@@ -217,7 +217,7 @@ section {
     position: relative;
     content: " ";
     background-color: var(--nav-hover-color);
-    height: 20px;
+
     height: 20px;
     transform: skew(20deg, 0);
 
@@ -1226,7 +1226,6 @@ main {
 
 .download-project button,
 .send-comment button {
-    padding: 5px 20px;
     background-color: #2fa5e9;
     outline: 0;
     text-align: center;
@@ -1271,9 +1270,6 @@ main {
 
 .send-comment {
     font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 7px;
-    margin-top: 10px;
     font-family: 'Roboto', sans-serif;
     color: var(#111, #111111);
     font-weight: 400;

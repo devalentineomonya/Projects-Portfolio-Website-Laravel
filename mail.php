@@ -101,6 +101,7 @@ $message = $_SESSION['message'];
         contactForm.submit();
         submission++;
 
+        // Disable the form to prevent further submissions
         contactForm.setAttribute('disabled', true);
     }
 });

@@ -53,7 +53,6 @@ main {
     max-width: 60%;
     box-shadow: var(--box-shadow);
     padding: 0.5em;
-    box-sizing: unset;
     z-index: 1050;
     background-color: white;
 
@@ -217,7 +216,7 @@ section {
     position: relative;
     content: " ";
     background-color: var(--nav-hover-color);
-
+    height: 20px;
     height: 20px;
     transform: skew(20deg, 0);
 
@@ -730,6 +729,7 @@ main {
 
 .platform {
     border: 1px solid #ccc;
+    max-height:100px;
 }
 
 .facebook a i {
@@ -1003,15 +1003,17 @@ main {
 
 @media screen and (max-width: 1200px) {
     .container {
-        width: 90%;
+        width: 100%;
+        
     }
 
     main {
-        max-width: 90%;
+        max-width: 100%;
+        /*padding-right:10px;*/
     }
 
     .sticky-nav {
-        padding: 10px 10%;
+        padding: 10px 0;
     }
 
 
@@ -1182,9 +1184,11 @@ main {
         column-gap: 20px;
     }
     .search-input-group{
-        width: 90%;
+        width: 100%;
     }
-
+.empty-card{
+width: 355px;
+}
 
 }
 
@@ -1226,6 +1230,7 @@ main {
 
 .download-project button,
 .send-comment button {
+    padding: 5px 20px;
     background-color: #2fa5e9;
     outline: 0;
     text-align: center;
@@ -1270,6 +1275,9 @@ main {
 
 .send-comment {
     font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 7px;
+    margin-top: 10px;
     font-family: 'Roboto', sans-serif;
     color: var(#111, #111111);
     font-weight: 400;

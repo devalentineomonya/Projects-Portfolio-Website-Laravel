@@ -2,7 +2,7 @@
    var anchor = document.querySelectorAll("a[rel=page]");
    [].slice.call(anchor).forEach(function (trigger) {
        trigger.addEventListener("click", function (e) {
-           e.preventDefault(); 
+           e.preventDefault(); // Prevent the default behavior of anchor tags
 
            var pageUrl = this.getAttribute("href");
 

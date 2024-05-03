@@ -25,11 +25,11 @@
                     userId: userId
                 },
                 success: function(response) {
-                 
+                    // Handle success (reload the page, display a message, etc.)
                     window.location.reload();
                 },
                 error: function(error) {
-            
+                    // Handle error
                     console.log(error);
                 }
             });

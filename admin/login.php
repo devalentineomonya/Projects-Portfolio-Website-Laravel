@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   if ($stmt->rowCount() > 0) {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     $hashedPassword = $user['password'];
-
+    // Verify the provided password against the stored hashed password
     if (password_verify($password, $hashedPassword)) {
       $ipAddress = $_SERVER['REMOTE_ADDR'];
       $_SESSION['ip'] = $ipAddress;

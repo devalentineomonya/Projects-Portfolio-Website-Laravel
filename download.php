@@ -66,7 +66,18 @@ $result = $getProjectInfo->fetch(PDO::FETCH_ASSOC);
                                 <?php
 
                                 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['saveDownload'])) {
-                                    echo '
+                                    // Check if the IP address exists in the database
+                                    $checkIpStmt = $conn->prepare("SELECT * FROM downloads WHERE userIp = :userIp ORDER BY created_at DESC LIMIT 1");
+                                    $checkIpStmt->bindParam(':userIp', $_POST['ipAddress']);
+                                    $checkIpStmt->execute();
+                                    $lastDownload = $checkIpStmt->fetch(PDO::FETCH_ASSOC);
+
+                                    // Initialize click count
+                                    $downloads = 1;
+
+
+                                    if (!$lastDownload) {
+                                        echo '
                                    <script>
                                    document.getElementById("btnDownload").style.display="none";
                                    document.getElementById("counterLab").style.display="block";
@@ -94,18 +105,6 @@ $result = $getProjectInfo->fetch(PDO::FETCH_ASSOC);
                                        countdown();
                                    </script>
                                    ';
-
-                                    
-                                    $checkIpStmt = $conn->prepare("SELECT * FROM downloads WHERE userIp = :userIp ORDER BY created_at DESC LIMIT 1");
-                                    $checkIpStmt->bindParam(':userIp', $_POST['ipAddress']);
-                                    $checkIpStmt->execute();
-                                    $lastDownload = $checkIpStmt->fetch(PDO::FETCH_ASSOC);
-
-                                 
-                                    $downloads = 1;
-
-
-                                    if (!$lastDownload) {
                                         $stmt = $conn->prepare("INSERT INTO downloads (userIp, browser, device, city, region, country, latitude, longitude, organization, downloads, created_at) 
                           VALUES (:userIp, :browser, :device, :city, :region, :country, :latitude, :longitude, :organization, :downloads, NOW())");
                                         $addDownload = $conn->prepare("INSERT INTO downloadedproject (project_name, userIp) VALUES (:projectName, :userIp)");
@@ -124,22 +123,50 @@ $result = $getProjectInfo->fetch(PDO::FETCH_ASSOC);
                                         $addDownload->bindParam(':userIp', $_POST['ipAddress']);
                                         $addDownload->bindParam(':projectName', $result['title']);
 
-                                     
+                                        // Execute the queries
                                         $stmt->execute();
                                         $addDownload->execute();
 
                                         $stmt->execute();
                                         $addDownload->execute();
                                     } else {
-                                      
+                                        // Check time difference
                                         $lastDownloadTime = strtotime($lastDownload['created_at']);
                                         $currentTime = time();
 
-                                        if ($currentTime - $lastDownloadTime > 60) {
-                                            $created_at = date('Y-m-d H:i:s'); 
+                                        if ($currentTime - $lastDownloadTime > 60) { 
+                                            echo '
+                                   <script>
+                                   document.getElementById("btnDownload").style.display="none";
+                                   document.getElementById("counterLab").style.display="block";
+                                       function getRandomSeconds() {
+                                           const minSeconds = 10;
+                                           const maxSeconds = 30;
+                                           const divisibleBy = 5;
+                                           return Math.floor(Math.random() * ((maxSeconds / divisibleBy) - (minSeconds / divisibleBy) + 1)) * divisibleBy + minSeconds;
+                                       }
+                               
+                                       let seconds = getRandomSeconds();
+                               
+                                       function countdown() {
+                                           document.getElementById("counter").innerHTML = " " + seconds + "";
+                                           if (seconds === 0) {
+                                            document.getElementById("btnDownload").style.display="block";
+                                            document.getElementById("counterLab").style.display="none";
+                                               window.location.href="' . $result['link'] . '";
+                                           } else {
+                                               seconds--;
+                                               setTimeout(countdown, 1000);
+                                           }
+                                       }
+                               
+                                       countdown();
+                                   </script>
+                                   ';
+                                            $created_at = date('Y-m-d H:i:s'); // Current timestamp
                                             $downloads = $lastDownload['downloads'] + 1;
 
-                                            
+                                            // Update download count
                                             $updateCountStmt = $conn->prepare("UPDATE downloads SET downloads = :downloads, created_at = :created_at WHERE userIp = :userIp");
                                             $addDownload = $conn->prepare("INSERT INTO downloadedproject (project_name, userIp) VALUES (:projectName, :userIp)");
                                             $addDownload->bindParam(':userIp', $_POST['ipAddress']);
@@ -154,6 +181,7 @@ $result = $getProjectInfo->fetch(PDO::FETCH_ASSOC);
                                             $updateCountStmt->execute();
                                             $addDownload->execute();
                                         } else {
+                                            // Handle the case when the last download is within the last 60 seconds
                                             echo 'Too many downloads within a short period. Please wait before trying again.';
                                         }
                                     }
@@ -277,9 +305,9 @@ $result = $getProjectInfo->fetch(PDO::FETCH_ASSOC);
                         </div>
                         <div class="popular-projects">
                             <?php
-                            $limit = 5; 
-                            $currentPage = isset($_GET['popular_page']) ? $_GET['popular_page'] : 1;
-                            $offset = ($currentPage - 1) * $limit;
+                            $limit = 5; // Number of projects per page
+                            $currentPage = isset($_GET['popular_page']) ? $_GET['popular_page'] : 1; // Get the current page from the URL
+                            $offset = ($currentPage - 1) * $limit; // Calculate the offset
 
                             $getPopularProjects = $conn->prepare('SELECT * FROM projects ORDER BY RAND() LIMIT :limit OFFSET :offset');
                             $getPopularProjects->bindParam(':limit', $limit, PDO::PARAM_INT);
@@ -287,7 +315,7 @@ $result = $getProjectInfo->fetch(PDO::FETCH_ASSOC);
                             $getPopularProjects->execute();
 
                             while ($popularProject = $getPopularProjects->fetch(PDO::FETCH_ASSOC)) {
-                            
+                                // Your code for processing each popular project record goes here
                             ?>
                                 <div class="project-container">
                                     <div class="project-image">
@@ -343,10 +371,11 @@ $result = $getProjectInfo->fetch(PDO::FETCH_ASSOC);
                         </div>
 
                         <?php
-                     
+                        // Assuming you have already established a database connection
                         $randomPostQuery = $conn->prepare('SELECT * FROM projects ORDER BY RAND() LIMIT 1');
                         $randomPostQuery->execute();
 
+                        // Check if there are results
                         if ($randomPostQuery->rowCount() > 0) {
                             $featuredPost = $randomPostQuery->fetch(PDO::FETCH_ASSOC);
                         ?>
@@ -384,7 +413,7 @@ $result = $getProjectInfo->fetch(PDO::FETCH_ASSOC);
                                     $getCategory = $conn->prepare("SELECT * FROM categories ");
                                     $getCategory->execute();
 
-                                    
+                                    // print_r($result);
                                     while ($result = $getCategory->fetch(PDO::FETCH_ASSOC)) {
                                         $getProjectCount = $conn->prepare("SELECT COUNT(*) as count FROM projects WHERE category = :category");
                                         $getProjectCount->bindParam(':category', $result['name']);

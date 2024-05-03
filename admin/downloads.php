@@ -13,6 +13,12 @@ include_once 'partials/header.php';
       </ol>
     </nav>
   </div>
+  <?php
+  if(isset($_SESSION['delete_error'])){
+      echo $_SESSION['delete_error'];
+      unset($_SESSION['delete_error']);
+  }
+  ?>
   <section class="section dashboard">
     <!--  -->
     <div class="row">
@@ -68,20 +74,21 @@ include_once 'partials/header.php';
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script>
   $(document).ready(function() {
-    
+    // Handle delete button click
     $('.btn-delete').click(function() {
       var downloadId = $(this).data('download-id');
       var confirmDelete = confirm('Are you sure you want to delete this record?');
 
       if (confirmDelete) {
-     
+        // Perform AJAX request to delete the record
         $.ajax({
-          url: 'delete-download.php',
+          url: 'delete-download.php', // Replace with your delete script
           method: 'POST',
           data: {
             downloadId: downloadId
           },
           success: function(response) {
+            // Reload the page or update the table as needed
             location.reload();
           },
           error: function(xhr, status, error) {

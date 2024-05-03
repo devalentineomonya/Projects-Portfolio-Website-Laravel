@@ -1,4 +1,5 @@
 <?php
+session_start();
 include_once 'connection.php';
 
 $getUserLevel = $conn->prepare("SELECT security_level FROM users WHERE user_id = :user_id");
@@ -14,14 +15,18 @@ if ($level['security_level'] == 1) {
         $stmt->bindParam(':downloadId', $downloadId);
         $stmt->execute();
 
-     
+        // Respond with success message
         echo "Record deleted successfully";
     } else {
-      
-        echo "Error: Download ID not provided";
+          $_SESSION['delete_error'] = '<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-octagon me-1"></i>
+    Error: Download ID not provided
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>';
+        
     }
 } else {
-    $_SESSION['error'] = '<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    $_SESSION['delete_error'] = '<div class="alert alert-danger alert-dismissible fade show" role="alert">
     <i class="bi bi-exclamation-octagon me-1"></i>
     You don\'t have permission to access this service.
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>

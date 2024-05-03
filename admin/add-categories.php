@@ -42,7 +42,7 @@ function getProjectIdsByCategory($conn, $categoryId)
 
 function handleAddCategory($conn, $categoryName, $categoryDescription, $uploadedImage, $currentDateTime)
 {
-   
+    // Validate input
     if (empty($categoryName) || empty($categoryDescription) || empty($uploadedImage)) {
         $_SESSION['error'] = '<div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="bi bi-exclamation-octagon me-1"></i>
@@ -53,7 +53,7 @@ function handleAddCategory($conn, $categoryName, $categoryDescription, $uploaded
         $imageUploadResult = uploadImage($_FILES["category_image"]);
 
         if (is_string($imageUploadResult)) {
-          
+            // Image upload failed, handle the error.
             $_SESSION['error'] = '<div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="bi bi-exclamation-octagon me-1"></i>
                         ' . $imageUploadResult . '
@@ -61,7 +61,7 @@ function handleAddCategory($conn, $categoryName, $categoryDescription, $uploaded
                     </div>';
         } else {
             try {
-
+                // Check for duplicate category name
                 $checkDuplicate = $conn->prepare("SELECT COUNT(*) FROM categories WHERE name = :name");
                 $checkDuplicate->bindParam(':name', $categoryName, PDO::PARAM_STR);
                 $checkDuplicate->execute();
@@ -74,6 +74,7 @@ function handleAddCategory($conn, $categoryName, $categoryDescription, $uploaded
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>';
                 } else {
+                    // Continue with the category insertion
                     $stmt = $conn->prepare("INSERT INTO categories (name, description, image_name, created_at, updated_at) VALUES (:name, :description, :image_name, :created_at, :updated_at)");
                     $stmt->bindParam(':name', $categoryName, PDO::PARAM_STR);
                     $stmt->bindParam(':description', $categoryDescription, PDO::PARAM_STR);
@@ -91,6 +92,7 @@ function handleAddCategory($conn, $categoryName, $categoryDescription, $uploaded
                     exit();
                 }
             } catch (PDOException $e) {
+                // Database insertion failed, delete the uploaded image
                 unlink("../images/" . $imageUploadResult['name']);
 
                 $_SESSION['error'] = '<div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -106,17 +108,21 @@ function handleAddCategory($conn, $categoryName, $categoryDescription, $uploaded
 
 function handleUpdateCategory($conn, $categoryId, $categoryName, $categoryDescription, $uploadedImage, $currentDateTime)
 {
+    // Retrieve the existing category details
     $getCategoryDetails = $conn->prepare("SELECT name, description, image_name FROM categories WHERE category_id = :category_id");
     $getCategoryDetails->bindParam(':category_id', $categoryId, PDO::PARAM_INT);
     $getCategoryDetails->execute();
     $existingCategoryDetails = $getCategoryDetails->fetch(PDO::FETCH_ASSOC);
 
+    // Check if the category is linked to any projects
     $isLinkedToProjects = isCategoryLinkedToProjects($conn, $categoryId);
 
+    // If the category is linked to projects, delete the link
     if ($isLinkedToProjects) {
         unlinkCategoryFromProjects($conn, $categoryId);
     }
 
+    // Compare existing values with new values
     $updatedFields = [];
     if ($existingCategoryDetails['name'] != $categoryName) {
         $updatedFields['name'] = $categoryName;
@@ -125,18 +131,24 @@ function handleUpdateCategory($conn, $categoryId, $categoryName, $categoryDescri
         $updatedFields['description'] = $categoryDescription;
     }
     if (!empty($uploadedImage)) {
+        // Get the new image name
         $imageUploadResult = uploadImage($_FILES["category_image"]);
         $updatedFields['image_name'] = $imageUploadResult['name'];
+
+        // Unlink the previous image
         unlink("../images/" . $existingCategoryDetails['image_name']);
     }
 
+    // Update the category details only for the changed fields
     if (!empty($updatedFields)) {
         $setClause = implode(', ', array_map(function ($field) {
             return "$field = :$field";
         }, array_keys($updatedFields)));
 
+        // Update the category details
         $stmt = $conn->prepare("UPDATE categories SET $setClause, updated_at = :updated_at WHERE category_id = :category_id");
 
+        // Bind parameters dynamically
         foreach ($updatedFields as $field => $value) {
             $stmt->bindParam(":$field", $value);
         }
@@ -145,6 +157,7 @@ function handleUpdateCategory($conn, $categoryId, $categoryName, $categoryDescri
         $stmt->bindParam(':category_id', $categoryId, PDO::PARAM_INT);
         $stmt->execute();
 
+        // If the category was linked to projects, recreate the link
         if ($isLinkedToProjects) {
             recreateCategoryProjectLink($conn, $categoryId, getProjectIdsByCategory($conn, $categoryId));
         }
@@ -157,7 +170,7 @@ function handleUpdateCategory($conn, $categoryId, $categoryName, $categoryDescri
         echo '<script type="text/javascript">window.location.href="categories.php"</script>';
         exit();
     } else {
-
+        // No fields to update
         echo '<script type="text/javascript">window.location.href="categories.php"</script>';
         exit();
     }
@@ -178,7 +191,7 @@ function handleUpdateCategory($conn, $categoryId, $categoryName, $categoryDescri
     </div>
 
     <?php
-
+    // Check if category ID is present in the URL
     if (!empty($_GET['id']) && isset($_GET['id'])) {
         $categoryId = $_GET['id'];
         $stmt = $conn->prepare("SELECT * FROM categories WHERE category_id = :category_id");
@@ -209,10 +222,10 @@ function handleUpdateCategory($conn, $categoryId, $categoryName, $categoryDescri
         $currentDateTime = date("Y-m-d H:i:s");
 
         if (isset($_POST['add_category'])) {
-   
+            // Add Category
             handleAddCategory($conn, $categoryName, $categoryDescription, $uploadedImage, $currentDateTime);
         } elseif (isset($_POST['update_category'])) {
-   
+            // Update Category
             handleUpdateCategory($conn, $categoryId, $categoryName, $categoryDescription, $uploadedImage, $currentDateTime);
         }
     }
@@ -235,6 +248,7 @@ function handleUpdateCategory($conn, $categoryId, $categoryName, $categoryDescri
                         }
                         ?>
 
+                        <!-- Custom Styled Validation -->
                         <form class="row g-3 needs-validation" enctype="multipart/form-data" method="post" novalidate>
 
                             <?php if (isset($_GET['id'])) : ?>

@@ -1,8 +1,8 @@
 <?php
 $host = 'localhost';
-$database = 'devalprojects';
-$username = 'root';
-$password = '';
+$database = 'id21727120_devalprojects';
+$username = 'id21727120_devalacademy';
+$password = '#@456WEtu&%20';
 
 
 try {

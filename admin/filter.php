@@ -23,10 +23,10 @@ if (isset($_GET['filter'])) {
             $sql = "SELECT * FROM projects";
     }
 
-
+    // Calculate the starting point for the projects based on the current page
     $start = ($current_page - 1) * $projectsPerPage;
 
-
+    // Append LIMIT and OFFSET to the SQL query for pagination
     $sql .= " LIMIT $start, $projectsPerPage";
 
     $stmt = $conn->prepare($sql);
@@ -66,15 +66,17 @@ if (isset($_GET['filter'])) {
         }
     }
 
+    // Pagination logic
     $pagination_sql = "SELECT COUNT(*) as total FROM projects";
     $pagination_stmt = $conn->prepare($pagination_sql);
     $pagination_stmt->execute();
     $total_projects = $pagination_stmt->fetchColumn();
     $total_pages = ceil($total_projects / $projectsPerPage);
 
+    // Display pagination links
     echo '<div class="pagination">';
     for ($i = 1; $i <= $total_pages; $i++) {
-        echo '<a href="?filter=' . $filter . '&page=' . $i . '"><i class="fa fa-chevron-circle-right" aria-hidden="true">' . $i . '</i></a>';
+        echo '<a href="?filter=' . $filter . '&page=' . $i . '"><i class="fa-solid fa-chevron-right">' . $i . '</i></a>';
     }
     echo '</div>';
 }

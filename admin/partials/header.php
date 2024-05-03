@@ -37,7 +37,7 @@ if ($userDetails) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.2/css/fontawesome.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/cerulean/bootstrap.min.css">
-    <link rel="shortcut icon" href="images\logo.png" type="image/x-icon">
+    <link rel="icon" type="image/x-icon" href="/images/logo.ico">
 
 
     <!-- Template Main CSS File -->

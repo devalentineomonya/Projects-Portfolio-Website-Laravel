@@ -1,5 +1,5 @@
 <?php
-session_start(); 
+session_start(); // Start the session
 include_once 'connection.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $getUserLevel->execute();
         $level = $getUserLevel->fetch(PDO::FETCH_ASSOC);
         if (isset($_SESSION['current_user']) && $_SESSION['current_user'] == $userId || $level == 1) {
-            
+            // Error if trying to delete the current user
             $_SESSION['delete_error'] = '<div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="bi bi-exclamation-octagon me-1"></i>
                 You cannot delete the current user or the admin!
@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>';
         } else {
             try {
-              
+                // Retrieve the image filename from the database
                 $sqlSelect = "SELECT image_name FROM Users WHERE user_id = :userId";
                 $stmtSelect = $conn->prepare($sqlSelect);
                 $stmtSelect->bindParam(':userId', $userId, PDO::PARAM_INT);
@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $resultSelect = $stmtSelect->fetch(PDO::FETCH_ASSOC);
 
                 if ($resultSelect) {
-                   
+                    // Delete the user record
                     $sqlDelete = "DELETE FROM Users WHERE user_id = :userId";
                     $stmtDelete = $conn->prepare($sqlDelete);
                     $stmtDelete->bindParam(':userId', $userId, PDO::PARAM_INT);
@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 exit();
             } catch (PDOException $e) {
-            
+                // Handle database errors
                 echo "Database Error: " . $e->getMessage();
             }
         }

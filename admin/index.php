@@ -198,7 +198,7 @@ include_once 'partials/header.php';
                                                 window.location.href = downloadUrl;
                                             }
                                         </script>
-                                        <p><?php echo $row['description'] ?></p>
+                                       <p style="max-height: 35px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"><?php echo $row['description']; ?></p>
                                     </div>
                             <?php
                                 }
@@ -215,10 +215,10 @@ include_once 'partials/header.php';
                     var filterLabel = $('#filterLabel');
                     var filterDropdown = $('#filterDropdown');
 
-     
+                    // Update the filter label
                     filterLabel.text('| ' + filter.replace('_', ' '));
 
-
+                    // Assuming you're using jQuery for simplicity
                     $.ajax({
                         url: 'filter.php',
                         type: 'GET',

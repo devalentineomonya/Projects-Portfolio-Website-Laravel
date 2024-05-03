@@ -31,9 +31,9 @@ if (empty($search) || strlen($search) < 1 || $search == "") {
             <div class="projects-section filtered-project">
                 <div class="project-left">
                     <?php
-                    $limit = 6;
-                    $currentPage = isset($_GET['page']) ? $_GET['page'] : 1; 
-                    $offset = ($currentPage - 1) * $limit; 
+                    $limit = 6; // Number of projects per page
+                    $currentPage = isset($_GET['page']) ? $_GET['page'] : 1; // Get the current page from the URL
+                    $offset = ($currentPage - 1) * $limit; // Calculate the offset
 
                     $getProjects = $conn->prepare(
                         '
@@ -61,6 +61,8 @@ if (empty($search) || strlen($search) < 1 || $search == "") {
                         <div class="card-container">
                             <?php
                             while ($project = $getProjects->fetch(PDO::FETCH_ASSOC)) {
+
+                                // Your code for processing each project record goes here
                             ?>
                                 <div class="card">
                                     <a class="card-link" href="projects.php?project=<?php echo $project['title'] ?>">
@@ -85,7 +87,7 @@ if (empty($search) || strlen($search) < 1 || $search == "") {
 
                         <div id="hiddenIfNull" class="navigation pagination">
                             <?php
-                         
+                            // Pagination links
                             $totalProjects = $conn->query('SELECT COUNT(*) FROM projects')->fetchColumn();
                             $totalPages = ceil($totalProjects / $limit);
 
@@ -154,9 +156,9 @@ if (empty($search) || strlen($search) < 1 || $search == "") {
                             </div>
                             <div class="card-container">
                                 <?php
-                                $limit = 6; 
-                                $currentPage = isset($_GET['page']) ? $_GET['page'] : 1; 
-                                $offset = ($currentPage - 1) * $limit; 
+                                $limit = 6; // Number of projects per page
+                                $currentPage = isset($_GET['page']) ? $_GET['page'] : 1; // Get the current page from the URL
+                                $offset = ($currentPage - 1) * $limit; // Calculate the offset
 
                                 $getProjects = $conn->prepare('SELECT * FROM projects LIMIT :limit OFFSET :offset');
                                 $getProjects->bindParam(':limit', $limit, PDO::PARAM_INT);
@@ -186,7 +188,7 @@ if (empty($search) || strlen($search) < 1 || $search == "") {
 
                             <div class="navigation pagination">
                                 <?php
-                             
+                                // Pagination links
                                 $totalProjects = $conn->query('SELECT COUNT(*) FROM projects')->fetchColumn();
                                 $totalPages = ceil($totalProjects / $limit);
 

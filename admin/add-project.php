@@ -6,22 +6,24 @@ include_once 'connection.php';
 $categories = $conn->prepare("SELECT * FROM categories");
 $categories->execute();
 
+// Check if project ID is present in the URL
 if (isset($_GET['id'])) {
     $projectId = $_GET['id'];
 
+    // Retrieve project details based on project ID
     $getProjectDetails = $conn->prepare("SELECT * FROM projects WHERE project_id = :projectId");
     $getProjectDetails->bindParam(':projectId', $projectId, PDO::PARAM_INT);
     $getProjectDetails->execute();
     $projectDetails = $getProjectDetails->fetch(PDO::FETCH_ASSOC);
 
-  
+    // Check if project details are found
     if ($projectDetails) {
-  
+        // Assign project details to variables for prefilling the form
         $prefillTitle = $projectDetails['title'];
         $prefillDescription = $projectDetails['description'];
         $prefillLanguage = $projectDetails['language'];
         $prefillCategory = $projectDetails['category'];
-
+        // Add more variables as needed
     }
 }
 
@@ -41,9 +43,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($level['security_level'] == 1) {
 
         if (isset($_POST['add'])) {
+            // Add Project
             handleAddProject($conn, $title, $description, $language, $category, $uploaded, $currentDateTime, $link);
         } elseif (isset($_POST['update'])) {
-          
+            // Update Project
             handleUpdateProject($conn, $projectId, $title, $description, $language, $category, $uploaded, $currentDateTime, $link);
         }
     }else{
@@ -57,7 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 function handleAddProject($conn, $title, $description, $language, $category, $uploaded, $currentDateTime, $link)
 {
-    
+    // Validate input
     if (empty($title) || empty($description) || empty($language) || empty($uploaded) || $category == 'none' || empty($link)) {
         $_SESSION['error'] = '<div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <i class="bi bi-exclamation-octagon me-1"></i>
@@ -68,7 +71,7 @@ function handleAddProject($conn, $title, $description, $language, $category, $up
         $imageUploadResult = uploadImage($_FILES["image"]);
 
         if (is_string($imageUploadResult)) {
-           
+            // Image upload failed, handle the error.
             $_SESSION['error'] = '<div class="alert alert-danger alert-dismissible fade show" role="alert">
                             <i class="bi bi-exclamation-octagon me-1"></i>
                             ' . $imageUploadResult . '
@@ -76,7 +79,7 @@ function handleAddProject($conn, $title, $description, $language, $category, $up
                         </div>';
         } else {
             try {
-               
+                // Check for duplicate project name
                 $checkDuplicate = $conn->prepare("SELECT COUNT(*) FROM projects WHERE title = :title");
                 $checkDuplicate->bindParam(':title', $title, PDO::PARAM_STR);
                 $checkDuplicate->execute();
@@ -89,7 +92,7 @@ function handleAddProject($conn, $title, $description, $language, $category, $up
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>';
                 } else {
-                 
+                    // Continue with the project insertion
                     $getCat = $conn->prepare("SELECT category_id FROM categories WHERE name = :category");
                     $getCat->bindParam(':category', $category, PDO::PARAM_STR);
                     $getCat->execute();
@@ -130,7 +133,7 @@ function handleAddProject($conn, $title, $description, $language, $category, $up
                     }
                 }
             } catch (PDOException $e) {
-              
+                // Database insertion failed, delete the uploaded image
                 unlink("../images/" . $imageUploadResult['name']);
 
                 $_SESSION['error'] = '<div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -146,23 +149,25 @@ function handleAddProject($conn, $title, $description, $language, $category, $up
 
 function handleUpdateProject($conn, $projectId, $title, $description, $language, $category, $uploaded, $currentDateTime, $link)
 {
-   
+    // Retrieve the previous category ID for the project
     $getPreviousCategory = $conn->prepare("SELECT category_id FROM projectcategories WHERE project_id = :projectId");
     $getPreviousCategory->bindParam(':projectId', $projectId, PDO::PARAM_INT);
     $getPreviousCategory->execute();
     $previousCategoryId = $getPreviousCategory->fetchColumn();
 
-
+    // Unlink the project from the previous category
     $unlinkPreviousCategory = $conn->prepare("DELETE FROM projectcategories WHERE project_id = :projectId");
     $unlinkPreviousCategory->bindParam(':projectId', $projectId, PDO::PARAM_INT);
     $unlinkPreviousCategory->execute();
 
+    // Get the new category ID
     $getNewCategory = $conn->prepare("SELECT category_id FROM categories WHERE name = :category");
     $getNewCategory->bindParam(':category', $category, PDO::PARAM_STR);
     $getNewCategory->execute();
     $newCategoryId = $getNewCategory->fetchColumn();
 
     if ($newCategoryId !== false) {
+        // Insert the updated project details
         $imageUploadResult = uploadImage($_FILES["image"]);
         $stmt = $conn->prepare("UPDATE projects SET title = :title, description = :description, language = :language, category = :category, link = :link, image_name = :image_name, updated_at = :updated_at WHERE project_id = :projectId");
         $stmt->bindValue(':title', $title);
@@ -170,11 +175,12 @@ function handleUpdateProject($conn, $projectId, $title, $description, $language,
         $stmt->bindValue(':language', $language);
         $stmt->bindValue(':category', $category);
         $stmt->bindValue(':link', $link);
-        $stmt->bindValue(':image_name', $imageUploadResult['name']); 
+        $stmt->bindValue(':image_name', $imageUploadResult['name']); // Use the existing image name for update
         $stmt->bindValue(':updated_at', $currentDateTime);
         $stmt->bindValue(':projectId', $projectId);
         $stmt->execute();
 
+        // Link the project to the new category
         $linkNewCategory = $conn->prepare("INSERT INTO projectcategories (project_id, category_id) VALUES (:project_id, :category_id)");
         $linkNewCategory->bindValue(':project_id', $projectId, PDO::PARAM_INT);
         $linkNewCategory->bindValue(':category_id', $newCategoryId, PDO::PARAM_INT);
@@ -188,7 +194,7 @@ function handleUpdateProject($conn, $projectId, $title, $description, $language,
         echo '<script type="text/javascript">window.location.href="projects.php"</script>';
         exit();
     } else {
-        
+        // Category not found
         $_SESSION['error'] = '<div class="alert alert-danger alert-dismissible fade show" role="alert">
                                 <i class="bi bi-exclamation-octagon me-1"></i>
                                 Category not found.
@@ -213,7 +219,8 @@ function handleUpdateProject($conn, $projectId, $title, $description, $language,
                 <li class="breadcrumb-item active"><?php echo isset($projectId) ? 'edit-Project' : 'add-Project'; ?></li>
             </ol>
         </nav>
-    </div>
+    </div><!-- End Page Title -->
+
     <section class="section">
         <div class="row justify-content-center">
             <div class="col-lg-8">
@@ -229,9 +236,9 @@ function handleUpdateProject($conn, $projectId, $title, $description, $language,
                         };
                         ?>
 
-                      
+                        <!-- General Form Elements -->
                         <form action="" method="post" enctype="multipart/form-data">
-                         
+                            <!-- Add hidden input field for project ID -->
                             <?php if (isset($projectId)) : ?>
                                 <input type="hidden" name="projectId" value="<?php echo $projectId; ?>">
                             <?php endif; ?>
@@ -292,7 +299,7 @@ function handleUpdateProject($conn, $projectId, $title, $description, $language,
                                     <a href="projects.php" type="cancel" class="btn btn-danger">Cancel </a>
                                 </div>
                             </div>
-                        </form>
+                        </form><!-- End General Form Elements -->
                     </div>
                 </div>
             </div>

@@ -8,19 +8,19 @@ header("Cache-Control: pre-check=0, post-check=0", false);
 header("Pragma: no-cache");
 include_once 'connection.php';
 
-
+// Define an array to map page names to their corresponding titles
 $pageTitles = array(
     "index.php" => "Home",
     "projects.php" => "Projects",
     "search.php" => "Search Results",
     "download.php"=>"Download Project"
-
+    // Add more pages and their titles as needed
 );
 
-
+// Get the current page URL
 $currentURL = basename($_SERVER['PHP_SELF']);
 
-
+// Check if the page title is defined in the array, if not use a default title
 $pageTitle = isset($pageTitles[$currentURL]) ? $pageTitles[$currentURL] : "Default Title";
 ?>
 <!DOCTYPE html>
@@ -29,8 +29,9 @@ $pageTitle = isset($pageTitles[$currentURL]) ? $pageTitles[$currentURL] : "Defau
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $pageTitle; ?> - devalprojects</title>
+    <title><?php echo $pageTitle; ?> - Devalprojects</title>
     <link rel="stylesheet" href="css/public.css">
+    <link rel="icon" type="image/x-icon" href="/images/logo.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
@@ -79,3 +80,6 @@ $pageTitle = isset($pageTitles[$currentURL]) ? $pageTitles[$currentURL] : "Defau
         </div>
     </header>
 
+    <div class="content" id="load">
+        <?php // Rest of your content ?>
+    </div>

@@ -1,4 +1,3 @@
-
 <?php
 include_once 'partials/header.php';
 include_once 'connection.php';
@@ -15,7 +14,7 @@ include_once 'upload.php';
                 <li class="breadcrumb-item active">add-user</li>
             </ol>
         </nav>
-    </div>
+    </div><!-- End Page Title -->
     <?php
 
      if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -27,11 +26,12 @@ include_once 'upload.php';
         $password = $_POST['password'];
         $uploaded = $_FILES['image']['name'];
 
+        // Validate and sanitize input
         $fullname = htmlspecialchars($fullname);
         $username = htmlspecialchars($username);
         $email = filter_var($email, FILTER_SANITIZE_EMAIL);
         $phone = filter_var($phone, FILTER_SANITIZE_NUMBER_INT);
-      
+        // You should also hash the password before storing it in the database for security reasons.
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
         if (empty($fullname) || empty($username) || empty($email) || empty($phone) || empty($password) || empty($uploaded) || empty($occupation)) {
@@ -49,7 +49,7 @@ include_once 'upload.php';
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>';
             } else {
-              
+                // Check if the username or email already exists
                 $stmt = $conn->prepare("SELECT COUNT(*) FROM users WHERE username = ? OR email = ?");
                 $stmt->execute([$username, $email]);
                 $count = $stmt->fetchColumn();
@@ -61,13 +61,13 @@ include_once 'upload.php';
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>';
                 } else {
-                    
+                    // Upload the image
                     $imageUploadResult = uploadImage($_FILES["image"]);
 
                     if (!is_string($imageUploadResult)) {
                         
                         try {
-                       
+                            // Using prepared statements to prevent SQL injection
                             $stmt = $conn->prepare("INSERT INTO users (full_name, username, occupation, email, phone, password, image_name) VALUES (?, ?, ?, ?, ?, ?, ?)");
                             $stmt->execute([$fullname, $username,$occupation,$email, $phone, $hashedPassword, $imageUploadResult['name']]);
 
@@ -79,18 +79,18 @@ include_once 'upload.php';
                                         echo '<script type="text/javascript">window.location.href="users.php";</script>';
                                         
                         } catch (PDOException $e) {
-                            
+                            // Database insertion failed, delete the uploaded image
                             unlink("../images/" . $imageUploadResult['name']);
     
                             $_SESSION['error'] = '<div class="alert alert-danger alert-dismissible fade show" role="alert">
                                             <i class="bi bi-exclamation-octagon me-1"></i>
-                                            Error adding user to the database.
+                                            Error adding user to the database.'. $e->getMessage().' 
                                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                         </div>';
                                 echo $occupation;
                         }
                     } else {
-                      
+                        // Image upload failed, handle the error.
                         $_SESSION['error'] = '<div class="alert alert-danger alert-dismissible fade show" role="alert">
                                     <i class="bi bi-exclamation-octagon me-1"></i>
                                     ' . $imageUploadResult . '
@@ -104,7 +104,8 @@ include_once 'upload.php';
     }
     ?>
 
-   
+    <!-- Rest of your code -->
+
     <section class="section">
         <div class="row justify-content-center">
             <div class="col-lg-8">
@@ -120,6 +121,7 @@ include_once 'upload.php';
                         };
                         ?>
 
+                        <!-- General Form Elements -->
                         <form action="" method="post" enctype="multipart/form-data">
                             <div class="row mb-3">
                                 <label for="inputText" class="col-sm-2 col-form-label">Full Name</label>
@@ -170,7 +172,7 @@ include_once 'upload.php';
                                 </div>
                             </div>
 
-                        </form>
+                        </form><!-- End General Form Elements -->
 
 
 

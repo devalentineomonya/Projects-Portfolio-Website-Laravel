@@ -167,6 +167,7 @@
                 const deviceType = get_device_type();
                 downloadUserInfo(ipAddress)
                     .then(function (userInfo) {
+                        // Set values in the form fields
                         document.getElementById('ipAddress').value = ipAddress;
                         document.getElementById('browser').value = browserType;
                         document.getElementById('device').value = deviceType;
@@ -186,4 +187,5 @@
             });
     }
 
+    // Call getUserInfo when the page loads
     getUserInfo();

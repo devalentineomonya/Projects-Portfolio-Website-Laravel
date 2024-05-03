@@ -59,9 +59,9 @@
         </div>
         <div class="popular-projects">
             <?php
-            $limit = 5; 
-            $currentPage = isset($_GET['popular_page']) ? $_GET['popular_page'] : 1; 
-            $offset = ($currentPage - 1) * $limit; 
+            $limit = 5; // Number of projects per page
+            $currentPage = isset($_GET['popular_page']) ? $_GET['popular_page'] : 1; // Get the current page from the URL
+            $offset = ($currentPage - 1) * $limit; // Calculate the offset
 
             $getPopularProjects = $conn->prepare('SELECT * FROM projects ORDER BY RAND() LIMIT :limit OFFSET :offset');
             $getPopularProjects->bindParam(':limit', $limit, PDO::PARAM_INT);
@@ -69,7 +69,7 @@
             $getPopularProjects->execute();
 
             while ($popularProject = $getPopularProjects->fetch(PDO::FETCH_ASSOC)) {
-            
+                // Your code for processing each popular project record goes here
             ?>
                 <div class="project-container">
                     <div class="project-image">
@@ -125,10 +125,11 @@
         </div>
 
         <?php
+        // Assuming you have already established a database connection
         $randomPostQuery = $conn->prepare('SELECT * FROM projects ORDER BY RAND() LIMIT 1');
         $randomPostQuery->execute();
 
-        
+        // Check if there are results
         if ($randomPostQuery->rowCount() > 0) {
             $featuredPost = $randomPostQuery->fetch(PDO::FETCH_ASSOC);
         ?>
@@ -146,7 +147,7 @@
                         $dateCreated = $dateCreatedArr->format('l jS F Y');
                         ?>
                         <span><?php echo $dateCreated ?></span>
-                        
+                        <!-- Add other post information as needed -->
                     </div>
                 </div>
             </div>
@@ -166,6 +167,7 @@
                     $getCategory = $conn->prepare("SELECT * FROM categories ");
                     $getCategory->execute();
 
+                    // print_r($result);
                     while ($result = $getCategory->fetch(PDO::FETCH_ASSOC)) {
                         $getProjectCount = $conn->prepare("SELECT COUNT(*) as count FROM projects WHERE category = :category");
                         $getProjectCount->bindParam(':category', $result['name']);

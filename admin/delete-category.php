@@ -1,5 +1,5 @@
 <?php
-session_start();
+session_start(); // Start the session
 include_once 'connection.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -14,12 +14,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $catId = $_POST['catId'];
 
             try {
-
+                // Delete the link between projects and the category
                 $sqlDeleteLink = "DELETE FROM projectcategories WHERE category_id = :category_id";
                 $stmtDeleteLink = $conn->prepare($sqlDeleteLink);
                 $stmtDeleteLink->bindValue(':category_id', $catId, PDO::PARAM_INT);
                 $stmtDeleteLink->execute();
 
+                // Check if the category has no more links to projects
                 $sqlCheckLinks = "SELECT COUNT(*) FROM projectcategories WHERE category_id = :category_id";
                 $stmtCheckLinks = $conn->prepare($sqlCheckLinks);
                 $stmtCheckLinks->bindValue(':category_id', $catId, PDO::PARAM_INT);
@@ -27,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $linkCount = $stmtCheckLinks->fetchColumn();
 
                 if ($linkCount == 0) {
-                   
+                    // No more links, delete the category
                     $sqlDeleteCategory = "DELETE FROM categories WHERE category_id = :category_id";
                     $stmtDeleteCategory = $conn->prepare($sqlDeleteCategory);
                     $stmtDeleteCategory->bindParam(':category_id', $catId, PDO::PARAM_INT);
@@ -40,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 exit();
             } catch (PDOException $e) {
-                
+                // Handle database errors
                 echo "Database Error: " . $e->getMessage();
             }
         }

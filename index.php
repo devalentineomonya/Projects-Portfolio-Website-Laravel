@@ -11,11 +11,11 @@ if (!isset($_GET["rel"]) || $_GET["rel"] !== "page") {
             $sql = "SELECT * FROM projects ORDER BY RAND() LIMIT 4";
             $result = $conn->query($sql);
 
-                
+                // Assign each record to a specific card
                 $card1 = $result->fetch(PDO::FETCH_ASSOC);
+                $card2 = $result->fetch(PDO::FETCH_ASSOC);
                 $card3 = $result->fetch(PDO::FETCH_ASSOC);
                 $card4 = $result->fetch(PDO::FETCH_ASSOC);
-                $card3 = $result->fetch(PDO::FETCH_ASSOC);
 
             ?>
             <div class="d-grid-col hero-main">
@@ -72,9 +72,9 @@ if (!isset($_GET["rel"]) || $_GET["rel"] !== "page") {
                     </div>
                     <div class="card-container">
                         <?php
-                        $limit = 6; 
-                        $currentPage = isset($_GET['page']) ? $_GET['page'] : 1;
-                        $offset = ($currentPage - 1) * $limit;
+                        $limit = 6; // Number of projects per page
+                        $currentPage = isset($_GET['page']) ? $_GET['page'] : 1; // Get the current page from the URL
+                        $offset = ($currentPage - 1) * $limit; // Calculate the offset
 
                         $getProjects = $conn->prepare('SELECT * FROM projects LIMIT :limit OFFSET :offset');
                         $getProjects->bindParam(':limit', $limit, PDO::PARAM_INT);
@@ -93,7 +93,7 @@ if (!isset($_GET["rel"]) || $_GET["rel"] !== "page") {
                                         <p>Posted on: <?php echo $dateCreated ?></p>
                                         <a class="view-more" href="download.php?project=<?php echo $project['title']?>">View More</a>
                                         <span><?php echo $project['language']; ?></span>
-                                       
+                                        <!-- Add other project information as needed -->
                                     </div>
                                 </a>
                             </div>
@@ -104,7 +104,7 @@ if (!isset($_GET["rel"]) || $_GET["rel"] !== "page") {
 
                     <div class="navigation pagination">
                         <?php
-                    
+                        // Pagination links
                         $totalProjects = $conn->query('SELECT COUNT(*) FROM projects')->fetchColumn();
                         $totalPages = ceil($totalProjects / $limit);
 

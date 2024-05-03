@@ -1,5 +1,5 @@
 <?php
-session_start(); 
+session_start(); // Start the session
 include_once 'connection.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -13,19 +13,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $projectId = $_POST['projectId'];
 
             try {
-              
+                // Retrieve the image filename and category ID from the database
                 $sqlSelect = "SELECT image_name FROM projects WHERE project_id = :projectId";
                 $stmtSelect = $conn->prepare($sqlSelect);
                 $stmtSelect->bindParam(':projectId', $projectId, PDO::PARAM_INT);
                 $stmtSelect->execute();
                 $resultSelect = $stmtSelect->fetch(PDO::FETCH_ASSOC);
 
-        
+                // Delete the link between project and category
                 $sqlDeleteLink = "DELETE FROM projectcategories WHERE project_id = :project_id";
                 $stmtDeleteLink = $conn->prepare($sqlDeleteLink);
                 $stmtDeleteLink->bindValue(':project_id', $projectId, PDO::PARAM_INT);
                 $stmtDeleteLink->execute();
 
+                // Check if the project has no more links to categories
                 $sqlCheckLinks = "SELECT COUNT(*) FROM projectcategories WHERE project_id = :project_id";
                 $stmtCheckLinks = $conn->prepare($sqlCheckLinks);
                 $stmtCheckLinks->bindValue(':project_id', $projectId, PDO::PARAM_INT);
@@ -33,18 +34,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $linkCount = $stmtCheckLinks->fetchColumn();
 
                 if ($linkCount == 0) {
-             
+                    // No more links, delete the project
                     $sqlDeleteProject = "DELETE FROM projects WHERE project_id = :projectId";
                     $stmtDeleteProject = $conn->prepare($sqlDeleteProject);
                     $stmtDeleteProject->bindParam(':projectId', $projectId, PDO::PARAM_INT);
                     $stmtDeleteProject->execute();
 
+                    // Delete the image file if it exists
                     if ($resultSelect) {
                         $imageFilename = $resultSelect['image_name'];
                         $imagePath = '../images/' . $imageFilename;
 
                         if ($imageFilename && file_exists($imagePath)) {
-                         
+                            // Check file permissions before attempting to delete
                             if (is_writable($imagePath)) {
                                 if (unlink($imagePath)) {
                                     echo "Image deleted successfully.";
@@ -62,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 exit();
             } catch (PDOException $e) {
+                // Handle database errors
                 echo "Database Error: " . $e->getMessage();
             }
         }
